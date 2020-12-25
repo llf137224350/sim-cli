@@ -5,7 +5,7 @@
 	"author": "llf137224350 <137224350@qq.com>",
 	"homepage": "",
 	"license": "ISC",
-	"main": "lib/core.js",
+	"main": "",
 	"bin": {
 		"sim-cli": "./bin/index.js"
 	},
