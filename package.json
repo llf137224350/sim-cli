@@ -1,6 +1,6 @@
 {
   "name": "sim-cli",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "sim-cli",
   "main": "index.js",
   "scripts": {
