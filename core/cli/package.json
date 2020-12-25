@@ -24,9 +24,13 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@sim-cli/utils": "file:../../utils/utils",
+    "@sim-cli/log": "file:../../utils/log",
+    "colors": "^1.4.0",
     "import-local": "^3.0.2",
-    "npmlog": "^4.1.2"
+    "path-exists": "^4.0.0",
+    "root-check": "^1.0.0",
+    "semver": "^7.3.4",
+    "user-home": "^2.0.0"
   },
   "gitHead": "f85271c8ce6f61226b4dae3a35c4c2ff0d610915",
   "publishConfig": {
