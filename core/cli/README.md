@@ -1,11 +1,11 @@
-# `core`
+# `index`
 
 > TODO: description
 
 ## Usage
 
 ```
-const core = require('core');
+const index = require('index');
 
 // TODO: DEMONSTRATE API
 ```
