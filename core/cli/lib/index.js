@@ -13,7 +13,7 @@ const npmInfo = require('@sim-cli/get-npm-info')
 const constant = require('./constant');
 let argv;
 
-function core() {
+async function core() {
   try {
     // 1、检查版本号
     checkPkgVersion();
@@ -97,13 +97,15 @@ function checkEnv() {
 // }
 
 // 检查版本更行
-function checkGlobalUpdate() {
+async function checkGlobalUpdate() {
   // 获取当前版本、包名
   const currentVersion = pkg.version;
   const packageName = pkg.name;
-
-  npmInfo.getNpmInfo(packageName)
   // 调用npm 接口，获取版本信息 http://registry.npmjs.org/包名
-
-  // 获取高于当前版本的版本信息
+  // 获取大于当前版本的最新的版本号
+  const lastVersion = await npmInfo.getNpmSemverVersion(currentVersion, packageName);
+  if (lastVersion && semver.gt(lastVersion, currentVersion)) { // 有新版本
+    log.warn('更新提示：', `请手动更新${packageName}到最新版本，当前版本：${currentVersion}，最新版本：${lastVersion}。`);
+    log.warn('更新命令：', `npm install -g ${packageName}`);
+  }
 }

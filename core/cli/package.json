@@ -32,7 +32,6 @@
     "minimist": "^1.2.5",
     "path-exists": "^4.0.0",
     "root-check": "^1.0.0",
-    "semver": "^7.3.4",
     "user-home": "^2.0.0"
   },
   "gitHead": "f85271c8ce6f61226b4dae3a35c4c2ff0d610915",
