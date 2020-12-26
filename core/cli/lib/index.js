@@ -9,6 +9,7 @@ const pathExists = require('path-exists').sync;
 const dotenv = require('dotenv');
 const pkg = require('../package.json');
 const log = require('@sim-cli/log');
+const npmInfo = require('@sim-cli/get-npm-info')
 const constant = require('./constant');
 let argv;
 
@@ -26,6 +27,8 @@ function core() {
     checkInputArgs();
     // 6、检查环境变量
     checkEnv();
+    // 7、检查版本更行
+    checkGlobalUpdate();
   } catch (e) {
     log.error('', e.message);
   }
@@ -65,7 +68,6 @@ function checkInputArgs() {
 
 // 设置log级别
 function checkArgs() {
-  console.log(argv);
   process.env.LOG_LEVEL = argv.debug || argv.d ? 'verbose' : 'info';
   log.level = process.env.LOG_LEVEL;
 }
@@ -93,3 +95,15 @@ function checkEnv() {
 //   // 将路径设置到环境变量
 //   process.env.CLI_HOME_PATH = defaultConfig.cliHome;
 // }
+
+// 检查版本更行
+function checkGlobalUpdate() {
+  // 获取当前版本、包名
+  const currentVersion = pkg.version;
+  const packageName = pkg.name;
+
+  npmInfo.getNpmInfo(packageName)
+  // 调用npm 接口，获取版本信息 http://registry.npmjs.org/包名
+
+  // 获取高于当前版本的版本信息
+}
