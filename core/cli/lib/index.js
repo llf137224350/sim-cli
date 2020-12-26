@@ -28,7 +28,7 @@ async function core() {
     // 6、检查环境变量
     checkEnv();
     // 7、检查版本更行
-    checkGlobalUpdate();
+    await checkGlobalUpdate();
   } catch (e) {
     log.error('', e.message);
   }
@@ -97,6 +97,7 @@ function checkEnv() {
 // }
 
 // 检查版本更行
+// TODO: 每次执行都检查更新是否值得，因为如果请求npm官方，则请求会比较慢，那么执行命令给人的感觉会不会比较慢？
 async function checkGlobalUpdate() {
   // 获取当前版本、包名
   const currentVersion = pkg.version;
