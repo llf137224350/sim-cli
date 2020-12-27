@@ -27,7 +27,7 @@ async function core() {
     checkInputArgs();
     // 6、检查环境变量
     checkEnv();
-    // 7、检查版本更行
+    // 7、检查版本更新
     await checkGlobalUpdate();
   } catch (e) {
     log.error('', e.message);
