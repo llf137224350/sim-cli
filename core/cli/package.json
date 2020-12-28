@@ -27,11 +27,11 @@
     "@sim-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@sim-cli/log": "file:../../utils/log",
     "@sim-cli/init": "file:../../commands/init",
+    "@sim-cli/exec": "file:../exec",
     "colors": "^1.4.0",
     "commander": "^6.2.1",
     "dotenv": "^8.2.0",
     "import-local": "^3.0.2",
-    "minimist": "^1.2.5",
     "path-exists": "^4.0.0",
     "root-check": "^1.0.0",
     "user-home": "^2.0.0"

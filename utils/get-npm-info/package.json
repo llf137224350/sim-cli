@@ -1,5 +1,5 @@
 {
-  "name": "get-npm-info",
+  "name": "@sim-cli/get-npm-info",
   "version": "1.0.2",
   "description": "get npm info",
   "author": "llf137224350 <137224350@qq.com>",

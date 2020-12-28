@@ -1,5 +1,5 @@
 {
-  "name": "init",
+  "name": "@sim-cli/init",
   "version": "1.0.2",
   "description": "init",
   "author": "llf137224350 <137224350@qq.com>",
@@ -13,6 +13,9 @@
   "files": [
     "lib"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   }

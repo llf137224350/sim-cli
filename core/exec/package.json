@@ -1,7 +1,7 @@
 {
-  "name": "@sim-cli/log",
+  "name": "@sim-cli/exec",
   "version": "1.0.2",
-  "description": "> TODO: description",
+  "description": "exec",
   "author": "llf137224350 <137224350@qq.com>",
   "homepage": "",
   "license": "ISC",
@@ -16,14 +16,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://git.code.tencent.com/llf137224350/sim-cli.git"
-  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "dependencies": {
-    "npmlog": "^4.1.2"
   }
 }

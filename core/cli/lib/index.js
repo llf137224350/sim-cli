@@ -17,25 +17,28 @@ let argv;
 const program = new commander.Command();//  创建一个命令实例
 async function core() {
   try {
-    // 1、检查版本号
-    checkPkgVersion();
-    // 2、检查node版本号
-    checkNodeVersion();
-    // 3、检查是否为root权限使用sim-cli
-    checkRoot();
-    // 4、检查用户主目录
-    checkUserHome();
-    // 5、检查入参
-    // checkInputArgs();
-    // 6、检查环境变量
-    checkEnv();
-    // 7、检查版本更新
-    // await checkGlobalUpdate();
+    // 准备阶段检查
+    await prepare();
     // 8 、注册命令
     registerCommand();
   } catch (e) {
     log.error('', e.message);
   }
+}
+
+async function prepare() {
+  // 1、检查版本号
+  checkPkgVersion();
+  // 2、检查node版本号
+  checkNodeVersion();
+  // 3、检查是否为root权限使用sim-cli
+  checkRoot();
+  // 4、检查用户主目录
+  checkUserHome();
+  // 6、检查环境变量
+  checkEnv();
+  // 7、检查版本更新
+  await checkGlobalUpdate();
 }
 
 // 检查版本号
@@ -64,18 +67,6 @@ function checkUserHome() {
   }
 }
 
-// 检查入参
-function checkInputArgs() {
-  argv = require('minimist')(process.argv.slice(2));
-  checkArgs();
-}
-
-// 设置log级别
-function checkArgs() {
-  process.env.LOG_LEVEL = argv.debug || argv.d ? 'verbose' : 'info';
-  log.level = process.env.LOG_LEVEL;
-}
-
 // 检查环境变量
 function checkEnv() {
   const dotenvPath = path.resolve(userHome, '.env')
@@ -101,7 +92,6 @@ function checkEnv() {
 // }
 
 // 检查版本更行
-// TODO: 每次执行都检查更新是否值得，因为如果请求npm官方，则请求会比较慢，那么执行命令给人的感觉会不会比较慢？
 async function checkGlobalUpdate() {
   // 获取当前版本、包名
   const currentVersion = pkg.version;
@@ -121,7 +111,9 @@ function registerCommand() {
     .name(Object.keys(pkg.bin)[0]) // 设置名称
     .usage('<command> [options]') // 设置使用方式
     .version(pkg.version) // 设置版本
-    .option('-d, --debug', '是否开启调试模式', false); // 添加调试模式
+    .option('-d, --debug', '是否开启调试模式', false) // 添加调试模式
+    .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
+
   // 命令注册
   addCommand();
   // 添加命令事件监听
@@ -150,6 +142,10 @@ function addProgramEventListener() {
   program.on('option:debug', function () {
     process.env.LOG_LEVEL = program.debug ? 'verbose' : 'info';
     log.level = process.env.LOG_LEVEL;
+  });
+  // 监听targetPath 属性
+  program.on('option:targetPath', function () {
+    process.env.CLI_TARGET_PATH = program.targetPath;
   });
   // 监听未知命令
   program.on('command:*', function (obj) {
