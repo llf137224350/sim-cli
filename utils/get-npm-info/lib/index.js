@@ -48,7 +48,7 @@ async function getNpmVersions(packageName, registry) {
  * @param isOriginal 是否为npm官方、默认true
  * @returns {string} 仓库地址
  */
-function getDefaultRegistry(isOriginal = true) {
+function getDefaultRegistry(isOriginal = false) {
   return isOriginal ? 'http://registry.npmjs.org' : 'http://registry.npm.taobao.org'
 }
 

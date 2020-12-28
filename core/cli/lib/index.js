@@ -12,8 +12,8 @@ const pkg = require('../package.json');
 const log = require('@sim-cli/log');
 const npmInfo = require('@sim-cli/get-npm-info')
 const init = require('@sim-cli/init');
+const exec = require('@sim-cli/exec');
 const constant = require('./constant');
-let argv;
 const program = new commander.Command();//  创建一个命令实例
 async function core() {
   try {
@@ -133,7 +133,7 @@ function addCommand() {
   program
     .command('init [projectName]')
     .option('-f, --force', '是否强制初始化项目')
-    .action(init);
+    .action(exec);
 }
 
 // 添加命令事件监听

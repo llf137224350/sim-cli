@@ -1,7 +1,7 @@
 {
-  "name": "@sim-cli/exec",
+  "name": "@sim-cli/package",
   "version": "1.0.2",
-  "description": "exec",
+  "description": "@sim-cli npm modules",
   "author": "llf137224350 <137224350@qq.com>",
   "homepage": "",
   "license": "ISC",
@@ -20,7 +20,9 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@sim-cli/package": "file:../../models/package",
-    "@sim-cli/log": "file:../../utils/log"
+    "@sim-cli/utils": "file:../../utils/utils",
+    "@sim-cli/format-path": "file:../../utils/format-path",
+    "colors": "^1.4.0",
+    "pkg-dir": "^5.0.0"
   }
 }
