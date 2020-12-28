@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@sim-cli/package": "file:../../models/package",
-    "@sim-cli/log": "file:../../utils/log"
+    "@sim-cli/log": "file:../../utils/log",
+    "colors": "^1.4.0"
   }
 }

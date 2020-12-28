@@ -48,7 +48,7 @@ async function getNpmVersions(packageName, registry) {
  * @param isOriginal 是否为npm官方、默认true
  * @returns {string} 仓库地址
  */
-function getDefaultRegistry(isOriginal = false) {
+function getDefaultRegistry(isOriginal = true) {
   return isOriginal ? 'http://registry.npmjs.org' : 'http://registry.npm.taobao.org'
 }
 
@@ -61,9 +61,7 @@ function getDefaultRegistry(isOriginal = false) {
 function getNpmSemverVersions(baseVersion, versions) {
   return versions.length ? versions
     .filter((version) => semver.satisfies(version, `^${baseVersion}`))
-    .sort((a, b) => {
-      return semver.gt(b, a) ? 1 : -1
-    }) : [];
+    .sort((a, b) => semver.gt(b, a) ? 1 : -1) : [];
 }
 
 /**
@@ -75,15 +73,31 @@ function getNpmSemverVersions(baseVersion, versions) {
  */
 async function getNpmSemverVersion(baseVersion, packageName, registry) {
   const versions = await getNpmVersions(packageName, registry);
-  const newVersions =  getNpmSemverVersions(baseVersion, versions);
+  const newVersions = getNpmSemverVersions(baseVersion, versions);
   if (newVersions.length) {
     return newVersions[0];
   }
+}
+
+/**
+ * 获取指定包最新版本
+ * @param packageName 包名
+ * @param registry 仓库
+ * @returns {Promise<null|string>}
+ */
+async function getNpmLastestVersion(packageName, registry) {
+  const versions = await getNpmVersions(packageName, registry);
+  if (versions) { // 查到了版本
+    return versions.sort((a, b) => semver.gt(b, a) ? 1 : -1)[0];
+  }
+  return null;
 }
 
 module.exports = {
   getNpmInfo,
   getNpmVersions,
   getNpmSemverVersions,
-  getNpmSemverVersion
+  getDefaultRegistry,
+  getNpmSemverVersion,
+  getNpmLastestVersion
 };

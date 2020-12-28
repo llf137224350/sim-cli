@@ -20,9 +20,13 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@sim-cli/utils": "file:../../utils/utils",
     "@sim-cli/format-path": "file:../../utils/format-path",
+    "@sim-cli/get-npm-info": "file:../../utils/get-npm-info",
+    "@sim-cli/utils": "file:../../utils/utils",
     "colors": "^1.4.0",
+    "fs-extra": "^9.0.1",
+    "npminstall": "^4.10.0",
+    "path-exists": "^4.0.0",
     "pkg-dir": "^5.0.0"
   }
 }

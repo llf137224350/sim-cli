@@ -11,7 +11,6 @@ const commander = require('commander');
 const pkg = require('../package.json');
 const log = require('@sim-cli/log');
 const npmInfo = require('@sim-cli/get-npm-info')
-const init = require('@sim-cli/init');
 const exec = require('@sim-cli/exec');
 const constant = require('./constant');
 const program = new commander.Command();//  创建一个命令实例
@@ -22,7 +21,11 @@ async function core() {
     // 8 、注册命令
     registerCommand();
   } catch (e) {
-    log.error('', e.message);
+    if (program.debug) {
+      console.error(e)
+    } else {
+      log.error('', e.message);
+    }
   }
 }
 
@@ -38,7 +41,7 @@ async function prepare() {
   // 6、检查环境变量
   checkEnv();
   // 7、检查版本更新
-  await checkGlobalUpdate();
+  // await checkGlobalUpdate();
 }
 
 // 检查版本号
