@@ -1,0 +1,19 @@
+{
+  "name": "init",
+  "version": "1.0.2",
+  "description": "init",
+  "author": "llf137224350 <137224350@qq.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  }
+}

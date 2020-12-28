@@ -7,12 +7,14 @@ const colors = require('colors/safe');
 const userHome = require('user-home');
 const pathExists = require('path-exists').sync;
 const dotenv = require('dotenv');
+const commander = require('commander');
 const pkg = require('../package.json');
 const log = require('@sim-cli/log');
 const npmInfo = require('@sim-cli/get-npm-info')
+const init = require('@sim-cli/init');
 const constant = require('./constant');
 let argv;
-
+const program = new commander.Command();//  创建一个命令实例
 async function core() {
   try {
     // 1、检查版本号
@@ -24,11 +26,13 @@ async function core() {
     // 4、检查用户主目录
     checkUserHome();
     // 5、检查入参
-    checkInputArgs();
+    // checkInputArgs();
     // 6、检查环境变量
     checkEnv();
     // 7、检查版本更新
-    await checkGlobalUpdate();
+    // await checkGlobalUpdate();
+    // 8 、注册命令
+    registerCommand();
   } catch (e) {
     log.error('', e.message);
   }
@@ -109,4 +113,48 @@ async function checkGlobalUpdate() {
     log.warn('更新提示：', `请手动更新${packageName}到最新版本，当前版本：${currentVersion}，最新版本：${lastVersion}。`);
     log.warn('更新命令：', `npm install -g ${packageName}`);
   }
+}
+
+// 注册命令
+function registerCommand() {
+  program
+    .name(Object.keys(pkg.bin)[0]) // 设置名称
+    .usage('<command> [options]') // 设置使用方式
+    .version(pkg.version) // 设置版本
+    .option('-d, --debug', '是否开启调试模式', false); // 添加调试模式
+  // 命令注册
+  addCommand();
+  // 添加命令事件监听
+  addProgramEventListener();
+  // 参数解析
+  program.parse(process.argv);
+
+  // 未输入命令 -- 打印帮助信息
+  if (program.args && program.args.length < 1) {
+    program.outputHelp();
+    console.log();
+  }
+}
+
+// 命令注册
+function addCommand() {
+  program
+    .command('init [projectName]')
+    .option('-f, --force', '是否强制初始化项目')
+    .action(init);
+}
+
+// 添加命令事件监听
+function addProgramEventListener() {
+  // 监听debug
+  program.on('option:debug', function () {
+    process.env.LOG_LEVEL = program.debug ? 'verbose' : 'info';
+    log.level = process.env.LOG_LEVEL;
+  });
+  // 监听未知命令
+  program.on('command:*', function (obj) {
+    const availableCommands = program.commands.map(cmd => cmd.name());
+    log.error('不受支持的命令', obj[0]);
+    availableCommands.length && log.info('当前支持的命令', availableCommands.join(','));
+  });
 }
