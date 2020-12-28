@@ -49,7 +49,7 @@ async function exec() {
     // init需要packageName,和一个对象，但是arguments是一个伪数组
     // 所以需要调用apply把数组转换为参数列表形式
     if (rootFile) {
-      require(rootFile).apply(null, arguments);
+      require(rootFile).call(null, Array.from(arguments));
     } else {
       throw new Error(colors.red('未找到文件'));
     }

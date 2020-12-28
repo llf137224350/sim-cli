@@ -1,7 +1,7 @@
 {
-  "name": "@sim-cli/init",
+  "name": "@sim-cli/command",
   "version": "1.0.2",
-  "description": "init",
+  "description": "@sim-cli command",
   "author": "llf137224350 <137224350@qq.com>",
   "homepage": "",
   "license": "ISC",
@@ -20,7 +20,8 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@sim-cli/command": "file:../../models/command",
-    "@sim-cli/log": "file:../../utils/log"
+    "@sim-cli/log": "file:../../utils/log",
+    "semver": "^7.3.4",
+    "colors": "^1.4.0"
   }
 }

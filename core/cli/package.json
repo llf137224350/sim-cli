@@ -30,6 +30,7 @@
     "@sim-cli/exec": "file:../exec",
     "colors": "^1.4.0",
     "commander": "^6.2.1",
+    "semver": "^7.3.4",
     "dotenv": "^8.2.0",
     "import-local": "^3.0.2",
     "path-exists": "^4.0.0",
