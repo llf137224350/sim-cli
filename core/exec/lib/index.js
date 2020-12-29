@@ -1,4 +1,5 @@
 'use strict';
+const cp = require('child_process');
 const path = require('path');
 const colors = require('colors');
 const Package = require('@sim-cli/package');
@@ -9,6 +10,61 @@ const SETTINGS = {
 }
 // 缓存目录
 const CACHE_DIR = 'dependencies'
+
+/**
+ * 子线程中执行
+ * @param rootFile 文件全路径
+ * @param args  传入的参数数组
+ * @private
+ */
+function _run(rootFile, args) {
+  try {
+    const cmd = args[args.length - 1];
+    const obj = Object.create(null);
+    Object.keys(cmd).forEach(key => {
+      if (cmd.hasOwnProperty(key) &&
+        !key.startsWith('_') &&
+        key !== 'parent') {
+        obj[key] = cmd[key];
+      }
+    })
+    args[args.length - 1] = obj;
+    // rootFile需要使用''括起来，否者会报 SyntaxError: Invalid regular expression flags
+    const code = `require('${rootFile}').call(null, ${JSON.stringify(args)})`;
+    // 通过node -e code执行源码字符串的方式
+    const child = spawn('node', ['-e', code], {
+      cwd: process.cwd(),
+      stdio: 'inherit' // 将输出流直接输出到主进程
+    });
+    // 监听执行成功信息
+    child.on('error', function (e) {
+      log.error(e.message);
+      process.exit(1);
+    });
+    // 监听执行出错信息
+    child.on('exit', function (e) {
+      log.verbose('命令执行成功！');
+      process.exit(e);
+    });
+  } catch (e) {
+    log.error(e.message);
+  }
+}
+
+/**
+ * 兼容windows spawn
+ * @param command mode
+ * @param args ['-e',code]
+ * @param options
+ * @returns {ChildProcessWithoutNullStreams}
+ */
+function spawn(command, args, options) {
+  const win32 = process.platform === 'win32';
+  const cmd = win32 ? 'cmd' : command;
+  // win32 ['/c','node','-e',code]
+  const cmdArgs = win32 ? ['/c'].concat(command, args) : args;
+  return cp.spawn(command, cmdArgs, options || {})
+}
 
 async function exec() {
   try {
@@ -49,7 +105,8 @@ async function exec() {
     // init需要packageName,和一个对象，但是arguments是一个伪数组
     // 所以需要调用apply把数组转换为参数列表形式
     if (rootFile) {
-      require(rootFile).call(null, Array.from(arguments));
+      // 通过子进程方式调用
+      _run(rootFile, Array.from(arguments));
     } else {
       throw new Error(colors.red('未找到文件'));
     }
