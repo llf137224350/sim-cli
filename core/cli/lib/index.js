@@ -22,7 +22,7 @@ async function core() {
     registerCommand();
   } catch (e) {
     if (program.debug) {
-      console.error(e)
+      console.error(e);
     } else {
       log.error('', e.message);
     }

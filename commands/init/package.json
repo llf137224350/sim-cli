@@ -21,6 +21,9 @@
   },
   "dependencies": {
     "@sim-cli/command": "file:../../models/command",
-    "@sim-cli/log": "file:../../utils/log"
+    "@sim-cli/log": "file:../../utils/log",
+    "inquirer": "^7.3.3",
+    "fs-extra": "^9.0.1",
+    "semver": "^7.3.4"
   }
 }
