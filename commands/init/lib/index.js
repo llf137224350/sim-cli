@@ -1,11 +1,16 @@
 'use strict';
 const fs = require('fs');
+const path = require('path');
 const inquirer = require('inquirer');
 const fes = require('fs-extra');
 const semver = require('semver');
+const colors = require('colors/safe');
+const userHome = require('user-home');
+
 const Command = require('@sim-cli/command');
 const log = require('@sim-cli/log');
-
+const Package = require('@sim-cli/package');
+const getProjectTemplates = require('./getProjectTemplates');
 // 项目类型
 const TYPE_PROJECT = 'project';
 const TYPE_COMPONENT = 'component';
@@ -29,8 +34,9 @@ class InitCommand extends Command {
       //  1.0 准备阶段
       const projectInfo = await this.prepare();
       if (!projectInfo) return;
+      this.projectInfo = projectInfo;
       // 下载项目模板
-      this.downloadTemplate();
+      await this.downloadTemplate();
     } catch (e) {
       if (process.env.LOG_LEVEL === 'verbose') {
         console.error(e);
@@ -43,8 +49,25 @@ class InitCommand extends Command {
   /**
    * 下载项目模板
    */
-  downloadTemplate() {
-    console.log('下载项目模板');
+  async downloadTemplate() {
+    const {projectTemplate} = this.projectInfo;
+    // 获取模板信息
+    const templateInfo = this.templates.find(item => item.npmName === projectTemplate);
+    const storeDir = path.resolve(userHome, '.sim-cli', 'template', 'node_modules');
+    const targetPath = path.resolve(userHome, '.sim-cli', 'template');
+    const packageManager = new Package({
+      packageName: templateInfo.npmName,
+      packageVersion: templateInfo.version,
+      targetPath: targetPath,
+      storeDir: storeDir
+    });
+    if (await packageManager.exists()) { // 存在 有新版本更新 无新版本 无操作
+      await packageManager.update();
+      log.success('模板更新成功！');
+    } else {
+      await packageManager.install();
+      log.success('模板下载成功！');
+    }
   }
 
   /**
@@ -79,6 +102,12 @@ class InitCommand extends Command {
       }]
     });
     if (type === TYPE_PROJECT) {
+      // 判断模板是否存在
+      const templates = await getProjectTemplates();
+      if (!templates || !templates.length) {
+        throw new Error('项目模板不存在！');
+      }
+      this.templates = templates;
       //  获取项目信息
       await this.getProjectInfo(info);
     } else if (type === TYPE_COMPONENT) {
@@ -134,9 +163,27 @@ class InitCommand extends Command {
         filter: function (v) {
           return semver.valid(v) ? semver.valid(v) : v;
         }
+      },
+      {
+        type: 'list',
+        name: 'projectTemplate',
+        message: '请选择项目模板',
+        choices: this.createTemplatesChoices()
       }
     ]);
     Object.assign(info, o);
+  }
+
+  /**
+   * 选择项目模板
+   */
+  createTemplatesChoices() {
+    return this.templates.map((item) => {
+      return {
+        name: item.name,
+        value: item.npmName
+      }
+    });
   }
 
   /**
@@ -157,7 +204,7 @@ class InitCommand extends Command {
         }
       }
       // 二次确认
-      ifContinue = await this.confirm('是否确认清空当前目录？');
+      ifContinue = await this.confirm(colors.red(`是否确认清空 "${currentDirPath}" 目录？`));
       if (!ifContinue) { // 输入n也要安装，只是不清空本地文件夹
         return true;
       }

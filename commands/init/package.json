@@ -22,8 +22,12 @@
   "dependencies": {
     "@sim-cli/command": "file:../../models/command",
     "@sim-cli/log": "file:../../utils/log",
-    "inquirer": "^7.3.3",
+    "@sim-cli/package": "file:../../models/package",
+    "@sim-cli/request": "file:../../utils/request",
+    "colors": "^1.4.0",
     "fs-extra": "^9.0.1",
-    "semver": "^7.3.4"
+    "inquirer": "^7.3.3",
+    "semver": "^7.3.4",
+    "user-home": "^2.0.0"
   }
 }
