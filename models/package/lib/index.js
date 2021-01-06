@@ -81,6 +81,8 @@ class Package {
     await this.prepare();
     return npminstall({
       root: this.targetPath,
+      // trace: false,
+      // detail: true,
       registry: getDefaultRegistry(),
       storeDir: this.storeDir,
       pkgs: [{
