@@ -121,10 +121,14 @@ class InitCommand extends Command {
         Promise.all(files.map((file) => {
           const filePath = path.resolve(dir, file);
           return new Promise((resolve, reject) => {
-            ejs.renderFile(filePath, {
+            const options = {
               className: this.projectInfo.className,
-              version: this.projectInfo.projectVersion
-            }, (error, result) => {
+              version: this.projectInfo.version
+            }
+            if (this.projectInfo.description) { // 当为组件的时候 有description
+              options['description'] = this.projectInfo.description;
+            }
+            ejs.renderFile(filePath, options, (error, result) => {
               if (error) {
                 reject(error);
               }
@@ -158,13 +162,16 @@ class InitCommand extends Command {
       // 停止动画
       spinner.stop(true);
       // ejs模板渲染
-      const ignore = ['node_modules/**', 'public/**'];
+      let ignore = ['**/node_modules/**'];
+      if (this.templateInfo.ignore) {
+        ignore = [...ignore, ...this.templateInfo.ignore];
+      }
       await this.ejsRender({ignore});
       const {installCommand, startCommand} = this.templateInfo;
       // 依赖安装
       await this.execCommand(installCommand, '依赖安装失败！');
       // 执行项目启动命令
-      await this.execCommand(startCommand, '项目q动失败！');
+      await this.execCommand(startCommand, '项目启动失败！');
     } catch (e) {
       spinner.stop(true);
       throw e
@@ -175,7 +182,24 @@ class InitCommand extends Command {
    * 安装自定义模板
    */
   async installCustomTemplate() {
-    console.log('安装自定义模板');
+    if (await this.packageManager.exists()) {
+      const rootFile = this.packageManager.getRootFilePath();
+      if (fs.existsSync(rootFile)) {
+        log.notice('开始执行自定义模板文件');
+        console.log(this.projectInfo);
+        const options = {
+          projectInfo: this.projectInfo,
+          templateInfo: this.templateInfo,
+          sourcePath: path.resolve(this.packageManager.cacheFilePath, 'template'),
+          targetPath: process.cwd()
+        }
+        const code = `require('${rootFile}')(${JSON.stringify(options)})`;
+        const ret = await execAsync('node', ['-e', code]);
+        log.success('自定义模板安装成功，code：' + ret);
+      } else {
+        throw new Error('自定义模板入口文件不存在！');
+      }
+    }
   }
 
   /**
@@ -237,18 +261,15 @@ class InitCommand extends Command {
         value: TYPE_COMPONENT
       }]
     });
-    if (type === TYPE_PROJECT) {
-      // 判断模板是否存在
-      const templates = await getProjectTemplates();
-      if (!templates || !templates.length) {
-        throw new Error('项目模板不存在！');
-      }
-      this.templates = templates;
-      //  获取项目信息
-      await this.getProjectInfo(info);
-    } else if (type === TYPE_COMPONENT) {
-      // 获取项目信息
+    // 判断模板是否存在
+    const templates = await getProjectTemplates();
+    if (!templates || !templates.length) {
+      throw new Error('项目模板不存在！');
     }
+    this.templates = templates.filter((template) => {
+      return template.tag.includes(type);
+    });
+    await this.getProjectInfo(info, type);
     info['type'] = type;
     return info;
   }
@@ -260,19 +281,21 @@ class InitCommand extends Command {
   /**
    * 获取项目基本信息
    * @param info
+   * @param type
    */
-  async getProjectInfo(info) {
+  async getProjectInfo(info, type) {
     // 判断用户是否传入projectName
     let isOk = false;
     if (this.projectName) {
       isOk = this.validateProjectName();
     }
     const options = [];
+    const title = type === TYPE_PROJECT ? '项目' : '组件';
     if (!isOk) { // 传入的项目名称不合法
       options.push({
         type: 'input',
         name: 'projectName',
-        message: '请输入项目名称：',
+        message: `请输入${title}名称：`,
         default: '',
         validate: function (v) {
           // 首字符必须为字母
@@ -281,7 +304,7 @@ class InitCommand extends Command {
           const done = this.async();
           setTimeout(function () {
             if (!/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)) {
-              done('请输入合法的项目名称');
+              done(`请输入合法的${title}名称`);
               return;
             }
             done(null, true);
@@ -295,7 +318,7 @@ class InitCommand extends Command {
     options.push({
       type: 'input',
       name: 'projectVersion',
-      message: '请输入项目版本号：',
+      message: `请输入${title}版本号：`,
       default: '1.0.0',
       validate: function (v) {
         const done = this.async();
@@ -311,10 +334,28 @@ class InitCommand extends Command {
         return semver.valid(v) ? semver.valid(v) : v;
       }
     });
+    if (type === TYPE_COMPONENT) {
+      options.push({
+        type: 'input',
+        name: 'componentDescription',
+        message: `请输入${title}描述信息：`,
+        default: '',
+        validate: function (v) {
+          const done = this.async();
+          setTimeout(function () {
+            if (!v) {
+              done(`请输入${title}描述信息`);
+              return;
+            }
+            done(null, true);
+          }, 0);
+        }
+      });
+    }
     options.push({
       type: 'list',
       name: 'projectTemplate',
-      message: '请选择项目模板',
+      message: `请选择${title}模板`,
       choices: this.createTemplatesChoices()
     });
     const o = await inquirer.prompt(options);
@@ -323,6 +364,11 @@ class InitCommand extends Command {
     }
     // 格式化项目名称 将驼峰形式转为使用-连接的形式 如abcDef => abc-def
     o.className = require('kebab-case')(o.projectName).replace(/^-/, '');
+    o.version = o.projectVersion;
+    // 如果是组件，则新增一个属性记录描述
+    if (type === TYPE_COMPONENT) {
+      o.description = o.componentDescription;
+    }
     Object.assign(info, o);
   }
 
