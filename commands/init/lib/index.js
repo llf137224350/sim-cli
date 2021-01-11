@@ -253,13 +253,23 @@ class InitCommand extends Command {
     return info;
   }
 
+  validateProjectName() {
+    return /^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(this.projectName)
+  }
+
   /**
    * 获取项目基本信息
    * @param info
    */
   async getProjectInfo(info) {
-    const o = await inquirer.prompt([
-      {
+    // 判断用户是否传入projectName
+    let isOk = false;
+    if (this.projectName) {
+      isOk = this.validateProjectName();
+    }
+    const options = [];
+    if (!isOk) { // 传入的项目名称不合法
+      options.push({
         type: 'input',
         name: 'projectName',
         message: '请输入项目名称：',
@@ -280,33 +290,37 @@ class InitCommand extends Command {
         filter: function (v) {
           return v;
         }
+      });
+    }
+    options.push({
+      type: 'input',
+      name: 'projectVersion',
+      message: '请输入项目版本号：',
+      default: '1.0.0',
+      validate: function (v) {
+        const done = this.async();
+        setTimeout(function () {
+          if (!(!!semver.valid(v))) {
+            done('请输入合法的项目版本号');
+            return;
+          }
+          done(null, true);
+        }, 0);
       },
-      {
-        type: 'input',
-        name: 'projectVersion',
-        message: '请输入项目版本号：',
-        default: '1.0.0',
-        validate: function (v) {
-          const done = this.async();
-          setTimeout(function () {
-            if (!(!!semver.valid(v))) {
-              done('请输入合法的项目版本号');
-              return;
-            }
-            done(null, true);
-          }, 0);
-        },
-        filter: function (v) {
-          return semver.valid(v) ? semver.valid(v) : v;
-        }
-      },
-      {
-        type: 'list',
-        name: 'projectTemplate',
-        message: '请选择项目模板',
-        choices: this.createTemplatesChoices()
+      filter: function (v) {
+        return semver.valid(v) ? semver.valid(v) : v;
       }
-    ]);
+    });
+    options.push({
+      type: 'list',
+      name: 'projectTemplate',
+      message: '请选择项目模板',
+      choices: this.createTemplatesChoices()
+    });
+    const o = await inquirer.prompt(options);
+    if (isOk) { // 传入的项目名称合法
+      o.projectName = this.projectName;
+    }
     // 格式化项目名称 将驼峰形式转为使用-连接的形式 如abcDef => abc-def
     o.className = require('kebab-case')(o.projectName).replace(/^-/, '');
     Object.assign(info, o);
