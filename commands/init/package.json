@@ -24,9 +24,13 @@
     "@sim-cli/log": "file:../../utils/log",
     "@sim-cli/package": "file:../../models/package",
     "@sim-cli/request": "file:../../utils/request",
+    "@sim-cli/utils": "file:../../utils/utils",
     "colors": "^1.4.0",
+    "ejs": "^3.1.5",
     "fs-extra": "^9.0.1",
+    "glob": "^7.1.6",
     "inquirer": "^7.3.3",
+    "kebab-case": "^1.0.0",
     "semver": "^7.3.4",
     "user-home": "^2.0.0"
   }

@@ -1,9 +1,10 @@
 'use strict';
-const cp = require('child_process');
+
 const path = require('path');
 const colors = require('colors');
 const Package = require('@sim-cli/package');
 const log = require('@sim-cli/log');
+const {exec: utilsExec} = require('@sim-cli/utils');
 // 命令与包名配置表
 const SETTINGS = {
   'init': '@sim-cli/init'
@@ -32,7 +33,7 @@ function _run(rootFile, args) {
     // rootFile需要使用''括起来，否者会报 SyntaxError: Invalid regular expression flags
     const code = `require('${rootFile}').call(null, ${JSON.stringify(args)})`;
     // 通过node -e code执行源码字符串的方式
-    const child = spawn('node', ['-e', code], {
+    const child = utilsExec('node', ['-e', code], {
       cwd: process.cwd(),
       stdio: 'inherit' // 将输出流直接输出到主进程
     });
@@ -49,21 +50,6 @@ function _run(rootFile, args) {
   } catch (e) {
     log.error(e.message);
   }
-}
-
-/**
- * 兼容windows spawn
- * @param command mode
- * @param args ['-e',code]
- * @param options
- * @returns {ChildProcessWithoutNullStreams}
- */
-function spawn(command, args, options) {
-  const win32 = process.platform === 'win32';
-  const cmd = win32 ? 'cmd' : command;
-  // win32 ['/c','node','-e',code]
-  const cmdArgs = win32 ? ['/c'].concat(command, args) : args;
-  return cp.spawn(command, cmdArgs, options || {})
 }
 
 async function exec() {

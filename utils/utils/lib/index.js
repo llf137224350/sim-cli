@@ -1,5 +1,6 @@
 'use strict';
 const Spinner = require('cli-spinner').Spinner;
+const cp = require('child_process');
 
 /**
  * 是否为一个对象
@@ -32,9 +33,41 @@ function startSpinner(msg = 'loading...', spinnerStr = '|/-\\') {
   return spinner;
 }
 
+/**
+ * 兼容windows spawn
+ * @param command mode
+ * @param args ['-e',code]
+ * @param options
+ * @returns {ChildProcessWithoutNullStreams}
+ */
+function exec(command, args, options) {
+  const win32 = process.platform === 'win32';
+  const cmd = win32 ? 'cmd' : command;
+  // win32 ['/c','node','-e',code]
+  const cmdArgs = win32 ? ['/c'].concat(command, args) : args;
+  return cp.spawn(command, cmdArgs, options || {
+    cwd: process.cwd(),
+    stdio: 'inherit' // 将输出流直接输出到主进程
+  })
+}
+
+function execAsync(command, args, options) {
+  return new Promise((resolve, reject) => {
+    const p = exec(command, args, options);
+    p.on('error', (e) => {
+      reject(e);
+    });
+    p.on('exit', (e) => {
+      resolve(e);
+    });
+  });
+}
+
 module.exports = {
   isObject,
   sleep,
-  startSpinner
+  startSpinner,
+  exec,
+  execAsync
 };
 
